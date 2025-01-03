@@ -32,7 +32,7 @@
             border: 1px solid #ccc;
             border-radius: 10px;
         }
-        input[type="text"], input[type="password"] {
+        input[type="text"], input[type="password"], input[type="file"] {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
@@ -62,6 +62,14 @@
             padding: 10px;
             text-align: left;
         }
+        #filterInput {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
@@ -83,7 +91,13 @@
         <button id="logoutButton">Logout</button>
         <h2>Employee Database</h2>
         <button id="addEmployeeButton">Add Employee</button>
+        <button id="importButton">Import Data</button>
+        <input type="file" id="importFile" style="display: none;" accept=".xlsx" />
         <button id="exportButton">Export to Excel</button>
+
+        <!-- Filter input for searching data -->
+        <input type="text" id="filterInput" placeholder="Search by Name, NIK, etc..." />
+
         <table id="employeeTable">
             <thead>
                 <tr>
@@ -183,6 +197,61 @@
             const table = document.getElementById('employeeTable');
             const workbook = XLSX.utils.table_to_book(table);
             XLSX.writeFile(workbook, 'Smartfren_Employee_Data.xlsx');
+        });
+
+        // Import Data button
+        document.getElementById('importButton').addEventListener('click', function() {
+            document.getElementById('importFile').click(); // Trigger file input click
+        });
+
+        // Handle file selection
+        document.getElementById('importFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const data = event.target.result;
+                    const workbook = XLSX.read(data, { type: 'binary' });
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]]; // Ambil sheet pertama
+                    const jsonData = XLSX.utils.sheet_to_json(sheet);
+                    
+                    // Loop untuk memasukkan data ke dalam tabel
+                    const table = document.getElementById('employeeTable').getElementsByTagName('tbody')[0];
+                    jsonData.forEach((employee) => {
+                        const row = table.insertRow();
+                        
+                        // Loop untuk mengisi setiap kolom berdasarkan data
+                        Object.values(employee).forEach((value, index) => {
+                            const cell = row.insertCell();
+                            cell.textContent = value;
+                        });
+                        
+                        // Tambahkan kolom untuk actions (edit & delete)
+                        const actionsCell = row.insertCell();
+                        actionsCell.innerHTML = `<button onclick="editRow(this)">Edit</button> <button onclick="deleteRow(this)">Delete</button>`;
+                    });
+
+                    alert('Data imported successfully!');
+                };
+                reader.readAsBinaryString(file);
+            }
+        });
+
+        // Filter functionality
+        document.getElementById('filterInput').addEventListener('keyup', function() {
+            const filter = this.value.toLowerCase();
+            const rows = document.getElementById('employeeTable').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+            
+            Array.from(rows).forEach(function(row) {
+                let match = false;
+                const cells = row.getElementsByTagName('td');
+                Array.from(cells).forEach(function(cell) {
+                    if (cell.textContent.toLowerCase().includes(filter)) {
+                        match = true;
+                    }
+                });
+                row.style.display = match ? '' : 'none';
+            });
         });
     </script>
 </body>
