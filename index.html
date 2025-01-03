@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smartfren Employee Database</title>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
     <style>
+        /* Styling sama seperti yang Anda buat sebelumnya */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -76,7 +79,6 @@
 </head>
 <body>
     <header>
-        <!-- Perbaikan URL logo Smartfren, gunakan URL yang valid -->
         <img src="https://www.smartfren.com/assets/img/smartfren-logo.png" alt="Smartfren Logo">
     </header>
 
@@ -106,7 +108,7 @@
                 <tr>
                     <th>Name</th>
                     <th>NIK</th>
-                    <th>Position</th> <!-- Menambahkan kolom Position -->
+                    <th>Position</th>
                     <th>Service Manager</th>
                     <th>Region</th>
                     <th>Cluster</th>
@@ -125,6 +127,21 @@
     </div>
 
     <script>
+        // Firebase configuration (replace with your Firebase project config)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDo4w8XtNOo5JGLCiVRJFlgWUJAnVSB1_w",
+            authDomain: "smartfren-database.firebaseapp.com",
+            projectId: "smartfren-database",
+            storageBucket: "smartfren-database.appspot.com",
+            messagingSenderId: "586021512206",
+            appId: "1:586021512206:web:a8af4d51fa349da57fc85f",
+            measurementId: "G-R4943YWL75"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
         // Simpan pengguna terdaftar
         const users = JSON.parse(localStorage.getItem('users')) || [];
         localStorage.setItem('users', JSON.stringify(users));
@@ -139,6 +156,7 @@
             if (user) {
                 document.getElementById('loginPage').style.display = 'none';
                 document.getElementById('mainPage').style.display = 'block';
+                getEmployees();  // Call to load employees from Firestore
             } else {
                 alert('Invalid username or password');
             }
@@ -165,39 +183,69 @@
 
         // Add employee
         document.getElementById('addEmployeeButton').addEventListener('click', function() {
-            const table = document.getElementById('employeeTable').getElementsByTagName('tbody')[0];
-            const row = table.insertRow();
-
-            for (let i = 0; i < 10; i++) {
-                const cell = row.insertCell();
-                if (i === 8) {
-                    cell.textContent = new Date().toISOString().split('T')[0]; // Default join date
-                } else if (i === 9) {
-                    cell.innerHTML = `<select><option value="Not Yet">Not Yet</option><option value="Completed">Completed</option></select>`;
-                } else {
-                    cell.contentEditable = true;
-                }
-            }
-
-            // Menambahkan kolom untuk posisi
-            const positionCell = row.insertCell();
-            positionCell.contentEditable = true;  // Kolom posisi bisa diedit
-
-            const actionsCell = row.insertCell();
-            actionsCell.innerHTML = `<button onclick="editRow(this)">Edit</button> <button onclick="deleteRow(this)">Delete</button>`;
+            const employee = {
+                name: prompt('Enter Name:'),
+                position: prompt('Enter Position:'),
+                serviceManager: prompt('Enter Service Manager:'),
+                region: prompt('Enter Region:'),
+                cluster: prompt('Enter Cluster:'),
+                phone: prompt('Enter Phone:'),
+                email: prompt('Enter Email:'),
+                ktp: prompt('Enter KTP:'),
+                joinDate: new Date().toISOString().split('T')[0],  // Default join date
+                licenseStatus: "Not Yet"
+            };
+            saveEmployeeData(employee);
         });
 
-        // Edit row
-        function editRow(button) {
-            const row = button.parentElement.parentElement;
-            row.contentEditable = true;
-            alert('Now editing. Click outside the cell to save.');
+        // Save employee to Firestore
+        function saveEmployeeData(employee) {
+            db.collection("employees").add(employee)
+            .then((docRef) => {
+                console.log("Employee added with ID: ", docRef.id);
+                alert('Employee added successfully!');
+                getEmployees();  // Refresh the employee table
+            })
+            .catch((error) => {
+                console.error("Error adding employee: ", error);
+            });
         }
 
-        // Delete row
-        function deleteRow(button) {
-            const row = button.parentElement.parentElement;
-            row.remove();
+        // Get employees from Firestore
+        function getEmployees() {
+            const table = document.getElementById('employeeTable').getElementsByTagName('tbody')[0];
+            db.collection("employees").get().then((querySnapshot) => {
+                table.innerHTML = '';  // Clear table before populating
+                querySnapshot.forEach((doc) => {
+                    const employee = doc.data();
+                    const row = table.insertRow();
+                    row.innerHTML = `
+                        <td>${employee.name}</td>
+                        <td>${employee.position}</td>
+                        <td>${employee.serviceManager}</td>
+                        <td>${employee.region}</td>
+                        <td>${employee.cluster}</td>
+                        <td>${employee.phone}</td>
+                        <td>${employee.email}</td>
+                        <td>${employee.ktp}</td>
+                        <td>${employee.joinDate}</td>
+                        <td>${employee.licenseStatus}</td>
+                        <td><button onclick="deleteEmployee('${doc.id}')">Delete</button></td>
+                    `;
+                });
+            });
+        }
+
+        // Delete employee from Firestore
+        function deleteEmployee(docId) {
+            db.collection("employees").doc(docId).delete()
+            .then(() => {
+                alert('Employee deleted successfully!');
+                getEmployees();  // Refresh the employee table
+            })
+            .catch((error) => {
+                console.error("Error deleting employee: ", error);
+            });
         }
 
         // Export to Excel
@@ -224,19 +272,8 @@
                     const jsonData = XLSX.utils.sheet_to_json(sheet);
                     
                     // Loop untuk memasukkan data ke dalam tabel
-                    const table = document.getElementById('employeeTable').getElementsByTagName('tbody')[0];
                     jsonData.forEach((employee) => {
-                        const row = table.insertRow();
-                        
-                        // Loop untuk mengisi setiap kolom berdasarkan data
-                        Object.values(employee).forEach((value, index) => {
-                            const cell = row.insertCell();
-                            cell.textContent = value;
-                        });
-                        
-                        // Tambahkan kolom untuk actions (edit & delete)
-                        const actionsCell = row.insertCell();
-                        actionsCell.innerHTML = `<button onclick="editRow(this)">Edit</button> <button onclick="deleteRow(this)">Delete</button>`;
+                        saveEmployeeData(employee);  // Menyimpan data ke Firestore
                     });
 
                     alert('Data imported successfully!');
@@ -261,115 +298,7 @@
                 row.style.display = match ? '' : 'none';
             });
         });
+
     </script>
 </body>
 </html>
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyDo4w8XtNOo5JGLCiVRJFlgWUJAnVSB1_w",
-  authDomain: "smartfren-database.firebaseapp.com",
-  projectId: "smartfren-database",
-  storageBucket: "smartfren-database.firebasestorage.app",
-  messagingSenderId: "586021512206",
-  appId: "1:586021512206:web:a8af4d51fa349da57fc85f",
-  measurementId: "G-R4943YWL75"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-
-<script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore.js"></script>
-
-<script>
-    // Firebase config (gunakan yang sudah Anda salin dari Firebase Console)
-    const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_PROJECT_ID.appspot.com",
-        messagingSenderId: "YOUR_SENDER_ID",
-        appId: "YOUR_APP_ID"
-    };
-
-    // Inisialisasi Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-
-    // Akses Firestore
-    const db = firebase.firestore();
-</script>
-
-function saveEmployeeData(employee) {
-    db.collection("employees").add({
-        name: employee.name,
-        position: employee.position,
-        phone: employee.phone,
-        email: employee.email,
-        joinDate: employee.joinDate,
-        licenseStatus: employee.licenseStatus
-    })
-    .then((docRef) => {
-        console.log("Employee added with ID: ", docRef.id);
-    })
-    .catch((error) => {
-        console.error("Error adding employee: ", error);
-    });
-}
-document.getElementById('addEmployeeButton').addEventListener('click', function() {
-    const employee = {
-        name: document.getElementById('name').value,
-        position: document.getElementById('position').value,
-        phone: document.getElementById('phone').value,
-        email: document.getElementById('email').value,
-        joinDate: new Date().toISOString().split('T')[0],  // Format YYYY-MM-DD
-        licenseStatus: "Not Yet"
-    };
-    saveEmployeeData(employee);
-});
-function getEmployees() {
-    db.collection("employees").get().then((querySnapshot) => {
-        const table = document.getElementById('employeeTable').getElementsByTagName('tbody')[0];
-        querySnapshot.forEach((doc) => {
-            const employee = doc.data();
-            const row = table.insertRow();
-            row.innerHTML = `
-                <td>${employee.name}</td>
-                <td>${employee.position}</td>
-                <td>${employee.phone}</td>
-                <td>${employee.email}</td>
-                <td>${employee.joinDate}</td>
-                <td>${employee.licenseStatus}</td>
-            `;
-        });
-    });
-}
-window.onload = function() {
-    getEmployees();
-};
-function updateEmployee(docId, updatedData) {
-    db.collection("employees").doc(docId).update(updatedData)
-    .then(() => {
-        console.log("Employee updated");
-    })
-    .catch((error) => {
-        console.error("Error updating employee: ", error);
-    });
-}
-function deleteEmployee(docId) {
-    db.collection("employees").doc(docId).delete()
-    .then(() => {
-        console.log("Employee deleted");
-    })
-    .catch((error) => {
-        console.error("Error deleting employee: ", error);
-    });
-}
-
