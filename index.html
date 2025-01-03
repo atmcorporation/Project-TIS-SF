@@ -4,10 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smartfren Employee Database</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-analytics.js"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
     <style>
         /* Styling sama seperti yang Anda buat sebelumnya */
         body {
@@ -128,7 +133,7 @@
     </div>
 
     <script>
-        // Firebase configuration (replace with your Firebase project config)
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDo4w8XtNOo5JGLCiVRJFlgWUJAnVSB1_w",
             authDomain: "smartfren-database.firebaseapp.com",
@@ -141,34 +146,25 @@
 
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
         const db = firebase.firestore();
+        const auth = firebase.auth();
 
-        // Simpan pengguna terdaftar
-        const users = JSON.parse(localStorage.getItem('users')) || [];
-        localStorage.setItem('users', JSON.stringify(users));
-
-        // Login form event
+        // Handling login
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
-            const user = users.find(u => u.username === username && u.password === password);
-            if (user) {
-                // Mock login process with Firebase authentication (if applicable)
-                auth.signInAnonymously()
-                .then(() => {
+            auth.signInWithEmailAndPassword(username, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
                     document.getElementById('loginPage').style.display = 'none';
                     document.getElementById('mainPage').style.display = 'block';
                     getEmployees();  // Call to load employees from Firestore
                 })
                 .catch((error) => {
-                    alert('Error signing in: ' + error.message);
+                    alert('Error logging in: ' + error.message);
                 });
-            } else {
-                alert('Invalid username or password');
-            }
         });
 
         // Register button event
@@ -176,9 +172,13 @@
             const username = prompt('Enter new username:');
             const password = prompt('Enter new password:');
             if (username && password) {
-                users.push({ username, password });
-                localStorage.setItem('users', JSON.stringify(users));
-                alert('User registered successfully!');
+                auth.createUserWithEmailAndPassword(username, password)
+                    .then((userCredential) => {
+                        alert('User registered successfully!');
+                    })
+                    .catch((error) => {
+                        alert('Error registering: ' + error.message);
+                    });
             } else {
                 alert('Both fields are required!');
             }
@@ -187,8 +187,11 @@
         // Logout button
         document.getElementById('logoutButton').addEventListener('click', function() {
             auth.signOut().then(() => {
+                alert('Logged out');
                 document.getElementById('mainPage').style.display = 'none';
                 document.getElementById('loginPage').style.display = 'block';
+            }).catch((error) => {
+                alert('Error logging out: ' + error.message);
             });
         });
 
@@ -212,14 +215,14 @@
         // Save employee to Firestore
         function saveEmployeeData(employee) {
             db.collection("employees").add(employee)
-            .then((docRef) => {
-                console.log("Employee added with ID: ", docRef.id);
-                alert('Employee added successfully!');
-                getEmployees();  // Refresh the employee table
-            })
-            .catch((error) => {
-                console.error("Error adding employee: ", error);
-            });
+                .then((docRef) => {
+                    console.log("Employee added with ID: ", docRef.id);
+                    alert('Employee added successfully!');
+                    getEmployees();  // Refresh the employee table
+                })
+                .catch((error) => {
+                    console.error("Error adding employee: ", error);
+                });
         }
 
         // Get employees from Firestore
@@ -250,13 +253,13 @@
         // Delete employee from Firestore
         function deleteEmployee(docId) {
             db.collection("employees").doc(docId).delete()
-            .then(() => {
-                alert('Employee deleted successfully!');
-                getEmployees();  // Refresh the employee table
-            })
-            .catch((error) => {
-                console.error("Error deleting employee: ", error);
-            });
+                .then(() => {
+                    alert('Employee deleted successfully!');
+                    getEmployees();  // Refresh the employee table
+                })
+                .catch((error) => {
+                    console.error("Error deleting employee: ", error);
+                });
         }
 
         // Export to Excel
@@ -266,49 +269,6 @@
             XLSX.writeFile(workbook, 'Smartfren_Employee_Data.xlsx');
         });
 
-        // Import Data button
-        document.getElementById('importButton').addEventListener('click', function() {
-            document.getElementById('importFile').click(); // Trigger file input click
-        });
-
-        // Handle file selection
-        document.getElementById('importFile').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const data = event.target.result;
-                    const workbook = XLSX.read(data, { type: 'binary' });
-                    const sheet = workbook.Sheets[workbook.SheetNames[0]]; // Ambil sheet pertama
-                    const jsonData = XLSX.utils.sheet_to_json(sheet);
-                    
-                    // Loop untuk memasukkan data ke dalam tabel
-                    jsonData.forEach((employee) => {
-                        saveEmployeeData(employee);  // Menyimpan data ke Firestore
-                    });
-
-                    alert('Data imported successfully!');
-                };
-                reader.readAsBinaryString(file);
-            }
-        });
-
-        // Filter functionality
-        document.getElementById('filterInput').addEventListener('keyup', function() {
-            const filter = this.value.toLowerCase();
-            const rows = document.getElementById('employeeTable').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-            
-            Array.from(rows).forEach(function(row) {
-                let match = false;
-                const cells = row.getElementsByTagName('td');
-                Array.from(cells).forEach(function(cell) {
-                    if (cell.textContent.toLowerCase().includes(filter)) {
-                        match = true;
-                    }
-                });
-                row.style.display = match ? '' : 'none';
-            });
-        });
     </script>
 </body>
 </html>
