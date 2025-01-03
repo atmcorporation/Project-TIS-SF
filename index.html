@@ -141,27 +141,59 @@
 </div>
 
 <script>
-  // Simulasi data karyawan
-  const employees = [
-    { name: 'John Doe', nik: '12345', position: 'Manager', serviceManager: 'Jane Smith', region: 'Jakarta', cluster: 'A', phone: '08123456789', email: 'john.doe@example.com', ktp: '9876543210', licenseStatus: 'Completed' },
-    { name: 'Alice Johnson', nik: '67890', position: 'Staff', serviceManager: 'Bob Brown', region: 'Surabaya', cluster: 'B', phone: '08234567890', email: 'alice.johnson@example.com', ktp: '1234567890', licenseStatus: 'Not Yet' },
-    // Tambahkan data karyawan lainnya di sini
-  ];
+  // Simulasi penyimpanan data pengguna dan karyawan
+  const users = [];
+  const employees = [];
+
+  // Menampilkan form login
+  function showLoginForm() {
+    document.getElementById('login-form').style.display = 'block';
+    document.getElementById('register-form').style.display = 'none';
+  }
+
+  // Menampilkan form registrasi
+  function showRegisterForm() {
+    document.getElementById('login-form').style.display = 'none';
+    document.getElementById('register-form').style.display = 'block';
+  }
+
+  // Fungsi registrasi
+  function register() {
+    const email = document.getElementById('register-email').value;
+    const password = document.getElementById('register-password').value;
+
+    if (!email || !password) {
+      alert('Email dan kata sandi harus diisi!');
+      return;
+    }
+
+    // Simpan data pengguna
+    users.push({ email, password });
+    alert('Registrasi berhasil! Silakan login.');
+    showLoginForm();
+  }
+
+  // Fungsi login
+  function login() {
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+
+    if (!email || !password) {
+      alert('Email dan kata sandi harus diisi!');
+      return;
+    }
+
+    // Cek kredensial pengguna
+    const user = users.find(u => u.email === email && u.password === password);
+    if (user) {
+      alert('Login berhasil!');
+      showEmployeeData();
+    } else {
+      alert('Email atau kata sandi salah!');
+    }
+  }
 
   // Menampilkan data karyawan
-  function displayEmployeeData() {
-    const tbody = document.getElementById('employee-table-body');
-    tbody.innerHTML = '';
-    employees.forEach((employee, index) => {
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${employee.name}</td>
-        <td>${employee.nik}</td>
-        <td>${employee.position}</td>
-        <td>${employee.serviceManager}</td>
-        <td>${employee.region}</td>
-        <td>${employee.cluster}</td>
-        <td>${employee.phone}</td>
-        <td
+  function show
 ::contentReference[oaicite:0]{index=0}
  
