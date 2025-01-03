@@ -4,45 +4,69 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smartfren Employee Database</title>
-    <!-- Include Firebase SDKs using modules -->
+    <!-- Import Firebase SDK -->
     <script type="module">
-      // Import the functions you need from the SDKs you need
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-      import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-analytics.js";
-      import { getFirestore } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-      import { getAuth } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-      
-      // Firebase configuration
-      const firebaseConfig = {
-        apiKey: "AIzaSyDo4w8XtNOo5JGLCiVRJFlgWUJAnVSB1_w",
-        authDomain: "smartfren-database.firebaseapp.com",
-        projectId: "smartfren-database",
-        storageBucket: "smartfren-database.firebasestorage.app",
-        messagingSenderId: "586021512206",
-        appId: "1:586021512206:web:2cd68a63e23395c27fc85f",
-        measurementId: "G-F6MN8ZN437"
-      };
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-analytics.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
-      // Initialize Firebase
-      const app = initializeApp(firebaseConfig);
-      const analytics = getAnalytics(app);
-      const db = getFirestore(app);
-      const auth = getAuth(app);
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDo4w8XtNOo5JGLCiVRJFlgWUJAnVSB1_w",
+            authDomain: "smartfren-database.firebaseapp.com",
+            projectId: "smartfren-database",
+            storageBucket: "smartfren-database.firebasestorage.app",
+            messagingSenderId: "586021512206",
+            appId: "1:586021512206:web:2cd68a63e23395c27fc85f",
+            measurementId: "G-F6MN8ZN437"
+        };
 
-      // Example: log Firebase initialization and database access
-      console.log("Firebase app initialized: ", app);
-      console.log("Firestore: ", db);
-      console.log("Firebase Auth: ", auth);
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
+        // Register a new user with email and password
+        async function registerUser(email, password) {
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                alert("User registered: " + userCredential.user.email);
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
+        }
+
+        // Sign in user with email and password
+        async function signInUser(email, password) {
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                alert("User signed in: " + userCredential.user.email);
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
+        }
     </script>
 </head>
 <body>
     <h1>Smartfren Employee Database</h1>
-    <p>This is the Firebase demo page for your Smartfren Employee database.</p>
+
     <button id="testButton">Test Firebase</button>
+    
+    <br/><br/>
+    <h2>Register User</h2>
+    <input type="email" id="registerEmail" placeholder="Enter email">
+    <input type="password" id="registerPassword" placeholder="Enter password">
+    <button onclick="registerUser(document.getElementById('registerEmail').value, document.getElementById('registerPassword').value)">Register</button>
+
+    <h2>Sign In</h2>
+    <input type="email" id="signInEmail" placeholder="Enter email">
+    <input type="password" id="signInPassword" placeholder="Enter password">
+    <button onclick="signInUser(document.getElementById('signInEmail').value, document.getElementById('signInPassword').value)">Sign In</button>
 
     <script>
-        // Example to check Firebase functionality
+        // Firebase test button
         document.getElementById('testButton').addEventListener('click', function() {
             alert("Firebase App Initialized! Check the console for more details.");
         });
