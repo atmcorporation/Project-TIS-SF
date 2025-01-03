@@ -107,24 +107,56 @@
     </div>
 
     <script>
+        // Simpan pengguna terdaftar
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        localStorage.setItem('users', JSON.stringify(users));
+
+        // Login form event
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            document.getElementById('loginPage').style.display = 'none';
-            document.getElementById('mainPage').style.display = 'block';
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const user = users.find(u => u.username === username && u.password === password);
+            if (user) {
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('mainPage').style.display = 'block';
+            } else {
+                alert('Invalid username or password');
+            }
         });
 
+        // Register button event
+        document.getElementById('registerButton').addEventListener('click', function() {
+            const username = prompt('Enter new username:');
+            const password = prompt('Enter new password:');
+            if (username && password) {
+                users.push({ username, password });
+                localStorage.setItem('users', JSON.stringify(users));
+                alert('User registered successfully!');
+            } else {
+                alert('Both fields are required!');
+            }
+        });
+
+        // Logout button
         document.getElementById('logoutButton').addEventListener('click', function() {
             document.getElementById('mainPage').style.display = 'none';
             document.getElementById('loginPage').style.display = 'block';
         });
 
+        // Add employee
         document.getElementById('addEmployeeButton').addEventListener('click', function() {
             const table = document.getElementById('employeeTable').getElementsByTagName('tbody')[0];
             const row = table.insertRow();
 
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < 11; i++) {
                 const cell = row.insertCell();
                 if (i === 9) {
+                    cell.innerHTML = `<select><option value="Not Yet">Not Yet</option><option value="Completed">Completed</option></select>`;
+                } else if (i === 8) {
+                    cell.textContent = new Date().toISOString().split('T')[0]; // Default join date
+                } else if (i === 10) {
                     cell.innerHTML = `<button onclick="editRow(this)">Edit</button> <button onclick="deleteRow(this)">Delete</button>`;
                 } else {
                     cell.contentEditable = true;
@@ -132,16 +164,20 @@
             }
         });
 
+        // Edit row
         function editRow(button) {
             const row = button.parentElement.parentElement;
             row.contentEditable = true;
+            alert('Now editing. Click outside the cell to save.');
         }
 
+        // Delete row
         function deleteRow(button) {
             const row = button.parentElement.parentElement;
             row.remove();
         }
 
+        // Export to Excel
         document.getElementById('exportButton').addEventListener('click', function() {
             const table = document.getElementById('employeeTable');
             const workbook = XLSX.utils.table_to_book(table);
