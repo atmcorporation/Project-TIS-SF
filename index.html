@@ -141,44 +141,43 @@
 
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();  // Firebase Authentication
-        const db = firebase.firestore();  // Firestore database
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-        // Login form event
+        // Handle user login
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const email = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
-            // Firebase Authentication login
             auth.signInWithEmailAndPassword(email, password)
                 .then((userCredential) => {
                     const user = userCredential.user;
                     console.log('Logged in as:', user.email);
                     document.getElementById('loginPage').style.display = 'none';
                     document.getElementById('mainPage').style.display = 'block';
-                    getEmployees();  // Load employees data
+                    getEmployees();  // Call to load employees from Firestore
                 })
                 .catch((error) => {
-                    const errorCode = error.code;
                     const errorMessage = error.message;
-                    console.error("Login failed:", errorCode, errorMessage);
                     alert("Login failed: " + errorMessage);
+                    console.log("Error details:", error);
                 });
         });
 
         // Register button event
         document.getElementById('registerButton').addEventListener('click', function() {
-            const email = prompt('Enter new email:');
-            const password = prompt('Enter new password:');
+            const email = prompt('Enter email:');
+            const password = prompt('Enter password:');
             if (email && password) {
                 auth.createUserWithEmailAndPassword(email, password)
                     .then((userCredential) => {
+                        const user = userCredential.user;
                         alert('User registered successfully!');
                     })
                     .catch((error) => {
-                        console.error("Registration failed:", error.code, error.message);
-                        alert("Registration failed: " + error.message);
+                        const errorMessage = error.message;
+                        alert('Registration failed: ' + errorMessage);
                     });
             } else {
                 alert('Both fields are required!');
@@ -191,39 +190,9 @@
                 document.getElementById('mainPage').style.display = 'none';
                 document.getElementById('loginPage').style.display = 'block';
             }).catch((error) => {
-                console.error("Error signing out: ", error);
+                console.log("Logout error:", error);
             });
         });
-
-        // Add employee
-        document.getElementById('addEmployeeButton').addEventListener('click', function() {
-            const employee = {
-                name: prompt('Enter Name:'),
-                position: prompt('Enter Position:'),
-                serviceManager: prompt('Enter Service Manager:'),
-                region: prompt('Enter Region:'),
-                cluster: prompt('Enter Cluster:'),
-                phone: prompt('Enter Phone:'),
-                email: prompt('Enter Email:'),
-                ktp: prompt('Enter KTP:'),
-                joinDate: new Date().toISOString().split('T')[0],  // Default join date
-                licenseStatus: "Not Yet"
-            };
-            saveEmployeeData(employee);
-        });
-
-        // Save employee to Firestore
-        function saveEmployeeData(employee) {
-            db.collection("employees").add(employee)
-                .then((docRef) => {
-                    console.log("Employee added with ID: ", docRef.id);
-                    alert('Employee added successfully!');
-                    getEmployees();  // Refresh the employee table
-                })
-                .catch((error) => {
-                    console.error("Error adding employee: ", error);
-                });
-        }
 
         // Get employees from Firestore
         function getEmployees() {
@@ -253,13 +222,13 @@
         // Delete employee from Firestore
         function deleteEmployee(docId) {
             db.collection("employees").doc(docId).delete()
-                .then(() => {
-                    alert('Employee deleted successfully!');
-                    getEmployees();  // Refresh the employee table
-                })
-                .catch((error) => {
-                    console.error("Error deleting employee: ", error);
-                });
+            .then(() => {
+                alert('Employee deleted successfully!');
+                getEmployees();  // Refresh the employee table
+            })
+            .catch((error) => {
+                console.error("Error deleting employee: ", error);
+            });
         }
 
         // Export to Excel
@@ -312,6 +281,7 @@
                 row.style.display = match ? '' : 'none';
             });
         });
+
     </script>
 </body>
 </html>
