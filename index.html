@@ -4,271 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smartfren Employee Database</title>
+    <!-- Include Firebase SDKs using modules -->
+    <script type="module">
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-analytics.js";
+      import { getFirestore } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+      import { getAuth } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+      
+      // Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyDo4w8XtNOo5JGLCiVRJFlgWUJAnVSB1_w",
+        authDomain: "smartfren-database.firebaseapp.com",
+        projectId: "smartfren-database",
+        storageBucket: "smartfren-database.firebasestorage.app",
+        messagingSenderId: "586021512206",
+        appId: "1:586021512206:web:2cd68a63e23395c27fc85f",
+        measurementId: "G-F6MN8ZN437"
+      };
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-analytics.js"></script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
 
-    <style>
-        /* Styling sama seperti yang Anda buat sebelumnya */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            width: 90%;
-            margin: auto;
-            overflow: hidden;
-        }
-        header {
-            background: #f44336;
-            color: #fff;
-            padding: 10px 0;
-            text-align: center;
-        }
-        header img {
-            max-height: 50px;
-            display: block;
-            margin: 0 auto;
-        }
-        form {
-            max-width: 400px;
-            margin: 20px auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-        }
-        input[type="text"], input[type="password"], input[type="file"] {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        button {
-            background: #f44336;
-            color: #fff;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #d32f2f;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        table, th, td {
-            border: 1px solid #ccc;
-        }
-        th, td {
-            padding: 10px;
-            text-align: left;
-        }
-        #filterInput {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-    </style>
+      // Example: log Firebase initialization and database access
+      console.log("Firebase app initialized: ", app);
+      console.log("Firestore: ", db);
+      console.log("Firebase Auth: ", auth);
+
+    </script>
 </head>
 <body>
-    <header>
-        <img src="https://www.smartfren.com/assets/img/smartfren-logo.png" alt="Smartfren Logo">
-    </header>
-
-    <div id="loginPage" class="container">
-        <form id="loginForm">
-            <h2>Login</h2>
-            <input type="text" id="username" placeholder="Username" required>
-            <input type="password" id="password" placeholder="Password" required>
-            <button type="submit">Login</button>
-            <button type="button" id="registerButton">Register</button>
-        </form>
-    </div>
-
-    <div id="mainPage" class="container" style="display: none;">
-        <button id="logoutButton">Logout</button>
-        <h2>Employee Database</h2>
-        <button id="addEmployeeButton">Add Employee</button>
-        <button id="importButton">Import Data</button>
-        <input type="file" id="importFile" style="display: none;" accept=".xlsx" />
-        <button id="exportButton">Export to Excel</button>
-
-        <!-- Filter input for searching data -->
-        <input type="text" id="filterInput" placeholder="Search by Name, NIK, Position, etc..." />
-
-        <table id="employeeTable">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>NIK</th>
-                    <th>Position</th>
-                    <th>Service Manager</th>
-                    <th>Region</th>
-                    <th>Cluster</th>
-                    <th>Phone</th>
-                    <th>Email</th>
-                    <th>KTP</th>
-                    <th>Join Date</th>
-                    <th>License Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Data Rows -->
-            </tbody>
-        </table>
-    </div>
+    <h1>Smartfren Employee Database</h1>
+    <p>This is the Firebase demo page for your Smartfren Employee database.</p>
+    <button id="testButton">Test Firebase</button>
 
     <script>
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyDo4w8XtNOo5JGLCiVRJFlgWUJAnVSB1_w",
-            authDomain: "smartfren-database.firebaseapp.com",
-            projectId: "smartfren-database",
-            storageBucket: "smartfren-database.appspot.com",
-            messagingSenderId: "586021512206",
-            appId: "1:586021512206:web:a8af4d51fa349da57fc85f",
-            measurementId: "G-R4943YWL75"
-        };
-
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth();
-
-        // Handling login
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-
-            auth.signInWithEmailAndPassword(username, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    document.getElementById('loginPage').style.display = 'none';
-                    document.getElementById('mainPage').style.display = 'block';
-                    getEmployees();  // Call to load employees from Firestore
-                })
-                .catch((error) => {
-                    alert('Error logging in: ' + error.message);
-                });
+        // Example to check Firebase functionality
+        document.getElementById('testButton').addEventListener('click', function() {
+            alert("Firebase App Initialized! Check the console for more details.");
         });
-
-        // Register button event
-        document.getElementById('registerButton').addEventListener('click', function() {
-            const username = prompt('Enter new username:');
-            const password = prompt('Enter new password:');
-            if (username && password) {
-                auth.createUserWithEmailAndPassword(username, password)
-                    .then((userCredential) => {
-                        alert('User registered successfully!');
-                    })
-                    .catch((error) => {
-                        alert('Error registering: ' + error.message);
-                    });
-            } else {
-                alert('Both fields are required!');
-            }
-        });
-
-        // Logout button
-        document.getElementById('logoutButton').addEventListener('click', function() {
-            auth.signOut().then(() => {
-                alert('Logged out');
-                document.getElementById('mainPage').style.display = 'none';
-                document.getElementById('loginPage').style.display = 'block';
-            }).catch((error) => {
-                alert('Error logging out: ' + error.message);
-            });
-        });
-
-        // Add employee
-        document.getElementById('addEmployeeButton').addEventListener('click', function() {
-            const employee = {
-                name: prompt('Enter Name:'),
-                position: prompt('Enter Position:'),
-                serviceManager: prompt('Enter Service Manager:'),
-                region: prompt('Enter Region:'),
-                cluster: prompt('Enter Cluster:'),
-                phone: prompt('Enter Phone:'),
-                email: prompt('Enter Email:'),
-                ktp: prompt('Enter KTP:'),
-                joinDate: new Date().toISOString().split('T')[0],  // Default join date
-                licenseStatus: "Not Yet"
-            };
-            saveEmployeeData(employee);
-        });
-
-        // Save employee to Firestore
-        function saveEmployeeData(employee) {
-            db.collection("employees").add(employee)
-                .then((docRef) => {
-                    console.log("Employee added with ID: ", docRef.id);
-                    alert('Employee added successfully!');
-                    getEmployees();  // Refresh the employee table
-                })
-                .catch((error) => {
-                    console.error("Error adding employee: ", error);
-                });
-        }
-
-        // Get employees from Firestore
-        function getEmployees() {
-            const table = document.getElementById('employeeTable').getElementsByTagName('tbody')[0];
-            db.collection("employees").get().then((querySnapshot) => {
-                table.innerHTML = '';  // Clear table before populating
-                querySnapshot.forEach((doc) => {
-                    const employee = doc.data();
-                    const row = table.insertRow();
-                    row.innerHTML = `
-                        <td>${employee.name}</td>
-                        <td>${employee.position}</td>
-                        <td>${employee.serviceManager}</td>
-                        <td>${employee.region}</td>
-                        <td>${employee.cluster}</td>
-                        <td>${employee.phone}</td>
-                        <td>${employee.email}</td>
-                        <td>${employee.ktp}</td>
-                        <td>${employee.joinDate}</td>
-                        <td>${employee.licenseStatus}</td>
-                        <td><button onclick="deleteEmployee('${doc.id}')">Delete</button></td>
-                    `;
-                });
-            });
-        }
-
-        // Delete employee from Firestore
-        function deleteEmployee(docId) {
-            db.collection("employees").doc(docId).delete()
-                .then(() => {
-                    alert('Employee deleted successfully!');
-                    getEmployees();  // Refresh the employee table
-                })
-                .catch((error) => {
-                    console.error("Error deleting employee: ", error);
-                });
-        }
-
-        // Export to Excel
-        document.getElementById('exportButton').addEventListener('click', function() {
-            const table = document.getElementById('employeeTable');
-            const workbook = XLSX.utils.table_to_book(table);
-            XLSX.writeFile(workbook, 'Smartfren_Employee_Data.xlsx');
-        });
-
     </script>
 </body>
 </html>
