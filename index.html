@@ -150,18 +150,19 @@
             const table = document.getElementById('employeeTable').getElementsByTagName('tbody')[0];
             const row = table.insertRow();
 
-            for (let i = 0; i < 11; i++) {
+            for (let i = 0; i < 10; i++) {
                 const cell = row.insertCell();
-                if (i === 9) {
-                    cell.innerHTML = `<select><option value="Not Yet">Not Yet</option><option value="Completed">Completed</option></select>`;
-                } else if (i === 8) {
+                if (i === 8) {
                     cell.textContent = new Date().toISOString().split('T')[0]; // Default join date
-                } else if (i === 10) {
-                    cell.innerHTML = `<button onclick="editRow(this)">Edit</button> <button onclick="deleteRow(this)">Delete</button>`;
+                } else if (i === 9) {
+                    cell.innerHTML = `<select><option value="Not Yet">Not Yet</option><option value="Completed">Completed</option></select>`;
                 } else {
                     cell.contentEditable = true;
                 }
             }
+
+            const actionsCell = row.insertCell();
+            actionsCell.innerHTML = `<button onclick="editRow(this)">Edit</button> <button onclick="deleteRow(this)">Delete</button>`;
         });
 
         // Edit row
