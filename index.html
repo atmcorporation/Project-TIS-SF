@@ -173,6 +173,18 @@
         window.onload = function() {
             const currentUser = localStorage.getItem('currentUser');
             if (currentUser) {
-                document.getElementById('loginPage').style.display =
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('mainPage').style.display = 'block';
+                loadEmployeeData();
+            } else {
+                document.getElementById('loginPage').style.display = 'block';
+                document.getElementById('mainPage').style.display = 'none';
+            }
+        };
+
+        // Fungsi login
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').
 ::contentReference[oaicite:0]{index=0}
  
