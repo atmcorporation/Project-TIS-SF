@@ -65,12 +65,13 @@
             margin-right: 5px;
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 </head>
 <body>
     <header>
         <div class="container">
             <div class="logo">
-                <img src="logo.png" alt="PT HARAPAN UTAMA PRIMA">
+                <img src="https://www.harapanutama.co.id/wp-content/uploads/2020/09/logo-harapan-utama-prima.png" alt="PT HARAPAN UTAMA PRIMA">
             </div>
             <ul>
                 <li><a href="#" id="logout">Logout</a></li>
@@ -148,17 +149,42 @@
         }
 
         function importExcel() {
-            // Function to import data from Excel
-            alert('Import Excel button clicked');
+            let input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.xlsx, .xls';
+            input.onchange = function(event) {
+                let file = event.target.files[0];
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    let data = new Uint8Array(e.target.result);
+                    let workbook = XLSX.read(data, {type: 'array'});
+                    let firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    let jsonData = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
+                    // Process jsonData to populate the table
+                    console.log(jsonData);
+                };
+                reader.readAsArrayBuffer(file);
+            };
+            input.click();
         }
 
         function exportExcel() {
-            // Function to export data to Excel
-            alert('Export Excel button clicked');
+            let table = document.getElementById('employee-table-body');
+            let data = [];
+            for (let i = 0, row; row = table.rows[i]; i++) {
+                let rowData = [];
+                for (let j = 0, col; col = row.cells[j]; j++) {
+                    rowData.push(col.innerText);
+                }
+                data.push(rowData);
+            }
+            let worksheet = XLSX.utils.aoa_to_sheet(data);
+            let workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Employees');
+            XLSX.writeFile(workbook, 'employees.xlsx');
         }
 
         function filterEmployees() {
-            // Function to filter employee data
             let filter = document.getElementById('filter').value.toUpperCase();
             let table = document.getElementById('employee-table-body');
             let tr = table.getElementsByTagName('tr');
