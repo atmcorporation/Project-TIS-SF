@@ -3,215 +3,322 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PT HARAPAN UTAMA PRIMA</title>
+    <title>Smartfren Employee Database</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #ffe6f2; /* Pink theme like Smartfren */
+            margin: 0;
+            padding: 0;
         }
         .container {
-            width: 80%;
+            width: 90%;
             margin: auto;
             overflow: hidden;
         }
         header {
-            background: #ff66b2;
+            background: #f44336;
             color: #fff;
-            padding-top: 30px;
-            min-height: 70px;
-            border-bottom: #ff3399 3px solid;
+            padding: 10px 0;
+            text-align: center;
         }
-        header a {
+        header img {
+            max-height: 50px;
+            display: block;
+            margin: 0 auto;
+        }
+        form {
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+        input[type="text"], input[type="password"], input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background: #f44336;
             color: #fff;
-            text-decoration: none;
-            text-transform: uppercase;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #d32f2f;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        #filterInput {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
             font-size: 16px;
         }
-        header ul {
-            padding: 0;
-            list-style: none;
-        }
-        header li {
-            float: right;
-            display: inline;
-            padding: 0 20px 0 20px;
-        }
-        .logo {
-            float: left;
-        }
-        .logo img {
-            width: 100px;
-        }
-        .login-form, .register-form {
-            background: #fff;
-            padding: 20px;
-            margin-top: 30px;
-            border: #ff66b2 1px solid;
-        }
-        .employee-table {
-            width: 100%;
-            margin-top: 20px;
-            border-collapse: collapse;
-        }
-        .employee-table th, .employee-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-        }
-        .employee-table th {
-            background-color: #ff66b2;
-            color: white;
-        }
-        .action-buttons button {
-            margin-right: 5px;
-        }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 </head>
 <body>
     <header>
-        <div class="container">
-            <div class="logo">
-                <img src="https://www.harapanutama.co.id/wp-content/uploads/2020/09/logo-harapan-utama-prima.png" alt="PT HARAPAN UTAMA PRIMA">
-            </div>
-            <ul>
-                <li><a href="#" id="logout">Logout</a></li>
-            </ul>
-        </div>
+        <img src="https://www.smartfren.com/assets/img/smartfren-logo.png" alt="Smartfren Logo">
     </header>
 
-    <div class="container">
-        <div class="login-form" id="login-form">
+    <div id="loginPage" class="container">
+        <form id="loginForm">
             <h2>Login</h2>
-            <form>
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username"><br><br>
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password"><br><br>
-                <button type="button" onclick="login()">Login</button>
-            </form>
-        </div>
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+            <button type="button" id="registerButton">Register</button>
+        </form>
+    </div>
 
-        <div class="register-form" id="register-form" style="display:none;">
-            <h2>Register User</h2>
-            <form>
-                <label for="new-username">Username:</label>
-                <input type="text" id="new-username" name="new-username"><br><br>
-                <label for="new-password">Password:</label>
-                <input type="password" id="new-password" name="new-password"><br><br>
-                <button type="button" onclick="register()">Register</button>
-            </form>
-        </div>
+    <div id="mainPage" class="container" style="display: none;">
+        <button id="logoutButton">Logout</button>
+        <h2>Employee Database</h2>
+        <button id="addEmployeeButton">Add Employee</button>
+        <button id="importButton">Import Data</button>
+        <input type="file" id="importFile" style="display: none;" accept=".xlsx" />
+        <button id="exportButton">Export to Excel</button>
 
-        <div id="employee-section" style="display:none;">
-            <h2>Employee Data</h2>
-            <button onclick="addEmployee()">Add Employee</button>
-            <button onclick="importExcel()">Import Excel</button>
-            <button onclick="exportExcel()">Export Excel</button>
-            <input type="text" id="filter" placeholder="Filter employees..." onkeyup="filterEmployees()">
-            <table class="employee-table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>NIK</th>
-                        <th>Position</th>
-                        <th>Service Manager</th>
-                        <th>Region</th>
-                        <th>Cluster</th>
-                        <th>No HP</th>
-                        <th>Email</th>
-                        <th>No KTP</th>
-                        <th>Status License</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="employee-table-body">
-                    <!-- Employee data will be inserted here -->
-                </tbody>
-            </table>
-        </div>
+        <!-- Filter input for searching data -->
+        <input type="text" id="filterInput" placeholder="Search by Name, NIK, Position, etc..." />
+
+        <table id="employeeTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>NIK</th>
+                    <th>Position</th>
+                    <th>Service Manager</th>
+                    <th>Region</th>
+                    <th>Cluster</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>KTP</th>
+                    <th>Join Date</th>
+                    <th>License Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data Rows -->
+            </tbody>
+        </table>
     </div>
 
     <script>
-        function login() {
-            // Simulate login
-            document.getElementById('login-form').style.display = 'none';
-            document.getElementById('employee-section').style.display = 'block';
+        // Simpan pengguna terdaftar
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        localStorage.setItem('users', JSON.stringify(users));
+
+        // Menyimpan data karyawan ke localStorage
+        function saveEmployeeData() {
+            const rows = document.getElementById('employeeTable').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+            const employeeData = [];
+            
+            Array.from(rows).forEach(function(row) {
+                const rowData = {};
+                const cells = row.getElementsByTagName('td');
+                rowData.name = cells[0].textContent;
+                rowData.nik = cells[1].textContent;
+                rowData.position = cells[2].textContent;
+                rowData.serviceManager = cells[3].textContent;
+                rowData.region = cells[4].textContent;
+                rowData.cluster = cells[5].textContent;
+                rowData.phone = cells[6].textContent;
+                rowData.email = cells[7].textContent;
+                rowData.ktp = cells[8].textContent;
+                rowData.joinDate = cells[9].textContent;
+                rowData.licenseStatus = cells[10].textContent;
+                employeeData.push(rowData);
+            });
+
+            localStorage.setItem('employeeData', JSON.stringify(employeeData)); // Menyimpan data karyawan
         }
 
-        function register() {
-            // Simulate user registration
-            alert('User registered successfully!');
+        // Memuat data karyawan dari localStorage
+        function loadEmployeeData() {
+            const employeeData = JSON.parse(localStorage.getItem('employeeData')) || [];
+            const table = document.getElementById('employeeTable').getElementsByTagName('tbody')[0];
+            employeeData.forEach((employee) => {
+                const row = table.insertRow();
+                Object.values(employee).forEach((value) => {
+                    const cell = row.insertCell();
+                    cell.textContent = value;
+                });
+
+                const actionsCell = row.insertCell();
+                actionsCell.innerHTML = `<button onclick="editRow(this)">Edit</button> <button onclick="deleteRow(this)">Delete</button>`;
+            });
         }
 
-        function addEmployee() {
-            // Function to add employee
-            alert('Add Employee button clicked');
-        }
-
-        function importExcel() {
-            let input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.xlsx, .xls';
-            input.onchange = function(event) {
-                let file = event.target.files[0];
-                let reader = new FileReader();
-                reader.onload = function(e) {
-                    let data = new Uint8Array(e.target.result);
-                    let workbook = XLSX.read(data, {type: 'array'});
-                    let firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    let jsonData = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
-                    // Process jsonData to populate the table
-                    console.log(jsonData);
-                };
-                reader.readAsArrayBuffer(file);
-            };
-            input.click();
-        }
-
-        function exportExcel() {
-            let table = document.getElementById('employee-table-body');
-            let data = [];
-            for (let i = 0, row; row = table.rows[i]; i++) {
-                let rowData = [];
-                for (let j = 0, col; col = row.cells[j]; j++) {
-                    rowData.push(col.innerText);
-                }
-                data.push(rowData);
+        // Cek login saat halaman di-load
+        window.onload = function() {
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('mainPage').style.display = 'block';
+                loadEmployeeData(); // Memuat data karyawan jika sudah login
+            } else {
+                document.getElementById('loginPage').style.display = 'block';
+                document.getElementById('mainPage').style.display = 'none';
             }
-            let worksheet = XLSX.utils.aoa_to_sheet(data);
-            let workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, 'Employees');
-            XLSX.writeFile(workbook, 'employees.xlsx');
-        }
+        };
 
-        function filterEmployees() {
-            let filter = document.getElementById('filter').value.toUpperCase();
-            let table = document.getElementById('employee-table-body');
-            let tr = table.getElementsByTagName('tr');
-            for (let i = 0; i < tr.length; i++) {
-                let td = tr[i].getElementsByTagName('td');
-                let show = false;
-                for (let j = 0; j < td.length; j++) {
-                    if (td[j].innerHTML.toUpperCase().indexOf(filter) > -1) {
-                        show = true;
-                        break;
-                    }
-                }
-                tr[i].style.display = show ? '' : 'none';
+        // Login form event
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const user = users.find(u => u.username === username && u.password === password);
+            if (user) {
+                localStorage.setItem('currentUser', username); // Simpan status login
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('mainPage').style.display = 'block';
+                loadEmployeeData(); // Memuat data karyawan setelah login
+            } else {
+                alert('Invalid username or password');
             }
-        }
-
-        document.getElementById('logout').addEventListener('click', function() {
-            document.getElementById('login-form').style.display = 'block';
-            document.getElementById('employee-section').style.display = 'none';
         });
 
-        // Ensure user stays logged in on reload
-        window.onload = function() {
-            if (document.getElementById('employee-section').style.display === 'block') {
-                document.getElementById('login-form').style.display = 'none';
+        // Register button event
+        document.getElementById('registerButton').addEventListener('click', function() {
+            const username = prompt('Enter new username:');
+            const password = prompt('Enter new password:');
+            if (username && password) {
+                users.push({ username, password });
+                localStorage.setItem('users', JSON.stringify(users));
+                alert('User registered successfully!');
+            } else {
+                alert('Both fields are required!');
             }
+        });
+
+        // Logout button
+        document.getElementById('logoutButton').addEventListener('click', function() {
+            localStorage.removeItem('currentUser'); // Hapus status login
+            document.getElementById('mainPage').style.display = 'none';
+            document.getElementById('loginPage').style.display = 'block';
+        });
+
+        // Add employee
+        document.getElementById('addEmployeeButton').addEventListener('click', function() {
+            const table = document.getElementById('employeeTable').getElementsByTagName('tbody')[0];
+            const row = table.insertRow();
+
+            for (let i = 0; i < 10; i++) {
+                const cell = row.insertCell();
+                if (i === 8) {
+                    cell.textContent = new Date().toISOString().split('T')[0]; // Default join date
+                } else if (i === 9) {
+                    cell.innerHTML = `<select><option value="Not Yet">Not Yet</option><option value="Completed">Completed</option></select>`;
+                } else {
+                    cell.contentEditable = true;
+                }
+            }
+
+            // Menambahkan kolom untuk posisi
+            const positionCell = row.insertCell();
+            positionCell.contentEditable = true;
+
+            const actionsCell = row.insertCell();
+            actionsCell.innerHTML = `<button onclick="editRow(this)">Edit</button> <button onclick="deleteRow(this)">Delete</button>`;
+
+            saveEmployeeData(); // Simpan data setelah menambahkan karyawan
+        });
+
+        // Edit row
+        function editRow(button) {
+            const row = button.parentElement.parentElement;
+            row.contentEditable = true;
+            alert('Now editing. Click outside the cell to save.');
         }
+
+        // Delete row
+        function deleteRow(button) {
+            const row = button.parentElement.parentElement;
+            row.remove();
+            saveEmployeeData(); // Simpan data setelah menghapus baris
+        }
+
+        // Export to Excel
+        document.getElementById('exportButton').addEventListener('click', function() {
+            const table = document.getElementById('employeeTable');
+            const workbook = XLSX.utils.table_to_book(table);
+            XLSX.writeFile(workbook, 'Smartfren_Employee_Data.xlsx');
+        });
+
+        // Import Data button
+        document.getElementById('importButton').addEventListener('click', function() {
+            document.getElementById('importFile').click(); // Trigger file input click
+        });
+
+        // Handle file selection
+        document.getElementById('importFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const data = event.target.result;
+                    const workbook = XLSX.read(data, { type: 'binary' });
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(sheet);
+                    
+                    // Loop untuk memasukkan data ke dalam tabel
+                    const table = document.getElementById('employeeTable').getElementsByTagName('tbody')[0];
+                    jsonData.forEach((employee) => {
+                        const row = table.insertRow();
+                        
+                        // Loop untuk mengisi setiap kolom berdasarkan data
+                        Object.values(employee).forEach((value) => {
+                            const cell = row.insertCell();
+                            cell.textContent = value;
+                        });
+                        
+                        // Tambahkan kolom untuk actions (edit & delete)
+                        const actionsCell = row.insertCell();
+                        actionsCell.innerHTML = `<button onclick="editRow(this)">Edit</button> <button onclick="deleteRow(this)">Delete</button>`;
+                    });
+
+                    saveEmployeeData(); // Simpan data setelah impor
+                    alert('Data imported successfully!');
+                };
+                reader.readAsBinaryString(file);
+            }
+        });
+
+        // Filter functionality
+        document.getElementById('filterInput').addEventListener('keyup', function() {
+            const filter = this.value.toLowerCase();
+            const rows = document.getElementById('employeeTable').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+            
+            Array.from(rows).forEach(function(row) {
+                let match = false;
+                const cells = row.getElementsByTagName('td');
+                Array.from(cells).forEach(function(cell) {
+                    if (cell.textContent.toLowerCase().includes(filter)) {
+                        match = true;
+                    }
+                });
+                row.style.display = match ? '' : 'none';
+            });
+        });
     </script>
-</body>
-</html>
