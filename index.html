@@ -1,199 +1,191 @@
 <!DOCTYPE html>
-<html lang="id-ID">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PT HARAPAN UTAMA PRIMA - Manajemen Karyawan</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f8f8f8;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background-color: #ff66b2;
-      padding: 20px;
-      text-align: center;
-      color: white;
-    }
-    .container {
-      width: 80%;
-      margin: 20px auto;
-      background-color: white;
-      padding: 20px;
-      border-radius: 8px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    table, th, td {
-      border: 1px solid #ddd;
-    }
-    th, td {
-      padding: 8px;
-      text-align: left;
-    }
-    th {
-      background-color: #ff66b2;
-      color: white;
-    }
-    .btn {
-      background-color: #ff66b2;
-      color: white;
-      padding: 8px 12px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .btn:hover {
-      background-color: #ff3385;
-    }
-    .form-group {
-      margin-bottom: 15px;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-    }
-    .form-group input, .form-group select {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-    .form-group input[type="file"] {
-      padding: 3px;
-    }
-    .form-group button {
-      width: 100%;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PT HARAPAN UTAMA PRIMA</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffe6f2; /* Pink theme like Smartfren */
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+        }
+        header {
+            background: #ff66b2;
+            color: #fff;
+            padding-top: 30px;
+            min-height: 70px;
+            border-bottom: #ff3399 3px solid;
+        }
+        header a {
+            color: #fff;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 16px;
+        }
+        header ul {
+            padding: 0;
+            list-style: none;
+        }
+        header li {
+            float: right;
+            display: inline;
+            padding: 0 20px 0 20px;
+        }
+        .logo {
+            float: left;
+        }
+        .logo img {
+            width: 100px;
+        }
+        .login-form, .register-form {
+            background: #fff;
+            padding: 20px;
+            margin-top: 30px;
+            border: #ff66b2 1px solid;
+        }
+        .employee-table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        .employee-table th, .employee-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        .employee-table th {
+            background-color: #ff66b2;
+            color: white;
+        }
+        .action-buttons button {
+            margin-right: 5px;
+        }
+    </style>
 </head>
 <body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <img src="logo.png" alt="PT HARAPAN UTAMA PRIMA">
+            </div>
+            <ul>
+                <li><a href="#" id="logout">Logout</a></li>
+            </ul>
+        </div>
+    </header>
 
-<header>
-  <h1>PT HARAPAN UTAMA PRIMA</h1>
-  <p>Manajemen Data Karyawan</p>
-</header>
+    <div class="container">
+        <div class="login-form" id="login-form">
+            <h2>Login</h2>
+            <form>
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username"><br><br>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password"><br><br>
+                <button type="button" onclick="login()">Login</button>
+            </form>
+        </div>
 
-<div class="container">
-  <!-- Form Login -->
-  <div id="login-form">
-    <h2>Login</h2>
-    <div class="form-group">
-      <label for="login-email">Email</label>
-      <input type="email" id="login-email" placeholder="Masukkan email" required>
+        <div class="register-form" id="register-form" style="display:none;">
+            <h2>Register User</h2>
+            <form>
+                <label for="new-username">Username:</label>
+                <input type="text" id="new-username" name="new-username"><br><br>
+                <label for="new-password">Password:</label>
+                <input type="password" id="new-password" name="new-password"><br><br>
+                <button type="button" onclick="register()">Register</button>
+            </form>
+        </div>
+
+        <div id="employee-section" style="display:none;">
+            <h2>Employee Data</h2>
+            <button onclick="addEmployee()">Add Employee</button>
+            <button onclick="importExcel()">Import Excel</button>
+            <button onclick="exportExcel()">Export Excel</button>
+            <input type="text" id="filter" placeholder="Filter employees..." onkeyup="filterEmployees()">
+            <table class="employee-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>NIK</th>
+                        <th>Position</th>
+                        <th>Service Manager</th>
+                        <th>Region</th>
+                        <th>Cluster</th>
+                        <th>No HP</th>
+                        <th>Email</th>
+                        <th>No KTP</th>
+                        <th>Status License</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="employee-table-body">
+                    <!-- Employee data will be inserted here -->
+                </tbody>
+            </table>
+        </div>
     </div>
-    <div class="form-group">
-      <label for="login-password">Kata Sandi</label>
-      <input type="password" id="login-password" placeholder="Masukkan kata sandi" required>
-    </div>
-    <button class="btn" onclick="login()">Masuk</button>
-    <p>Belum punya akun? <a href="javascript:void(0);" onclick="showRegisterForm()">Daftar</a></p>
-  </div>
 
-  <!-- Form Register -->
-  <div id="register-form" style="display: none;">
-    <h2>Daftar Pengguna Baru</h2>
-    <div class="form-group">
-      <label for="register-email">Email</label>
-      <input type="email" id="register-email" placeholder="Masukkan email" required>
-    </div>
-    <div class="form-group">
-      <label for="register-password">Kata Sandi</label>
-      <input type="password" id="register-password" placeholder="Masukkan kata sandi" required>
-    </div>
-    <button class="btn" onclick="register()">Daftar</button>
-    <p>Sudah punya akun? <a href="javascript:void(0);" onclick="showLoginForm()">Masuk</a></p>
-  </div>
+    <script>
+        function login() {
+            // Simulate login
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('employee-section').style.display = 'block';
+        }
 
-  <!-- Data Karyawan -->
-  <div id="employee-data" style="display: none;">
-    <h2>Data Karyawan</h2>
-    <button class="btn" onclick="addEmployee()">Tambah Karyawan</button>
-    <button class="btn" onclick="importData()">Impor Data Excel</button>
-    <button class="btn" onclick="exportData()">Ekspor Data Excel</button>
-    <input type="text" id="search" placeholder="Cari..." oninput="filterData()">
-    <table>
-      <thead>
-        <tr>
-          <th>Nama</th>
-          <th>NIK</th>
-          <th>Posisi</th>
-          <th>Service Manager</th>
-          <th>Region</th>
-          <th>Cluster</th>
-          <th>No HP</th>
-          <th>Email</th>
-          <th>No KTP</th>
-          <th>Status Lisensi</th>
-          <th>Aksi</th>
-        </tr>
-      </thead>
-      <tbody id="employee-table-body">
-        <!-- Data karyawan akan ditampilkan di sini -->
-      </tbody>
-    </table>
-  </div>
-</div>
+        function register() {
+            // Simulate user registration
+            alert('User registered successfully!');
+        }
 
-<script>
-  // Simulasi penyimpanan data pengguna dan karyawan
-  const users = [];
-  const employees = [];
+        function addEmployee() {
+            // Function to add employee
+            alert('Add Employee button clicked');
+        }
 
-  // Menampilkan form login
-  function showLoginForm() {
-    document.getElementById('login-form').style.display = 'block';
-    document.getElementById('register-form').style.display = 'none';
-  }
+        function importExcel() {
+            // Function to import data from Excel
+            alert('Import Excel button clicked');
+        }
 
-  // Menampilkan form registrasi
-  function showRegisterForm() {
-    document.getElementById('login-form').style.display = 'none';
-    document.getElementById('register-form').style.display = 'block';
-  }
+        function exportExcel() {
+            // Function to export data to Excel
+            alert('Export Excel button clicked');
+        }
 
-  // Fungsi registrasi
-  function register() {
-    const email = document.getElementById('register-email').value;
-    const password = document.getElementById('register-password').value;
+        function filterEmployees() {
+            // Function to filter employee data
+            let filter = document.getElementById('filter').value.toUpperCase();
+            let table = document.getElementById('employee-table-body');
+            let tr = table.getElementsByTagName('tr');
+            for (let i = 0; i < tr.length; i++) {
+                let td = tr[i].getElementsByTagName('td');
+                let show = false;
+                for (let j = 0; j < td.length; j++) {
+                    if (td[j].innerHTML.toUpperCase().indexOf(filter) > -1) {
+                        show = true;
+                        break;
+                    }
+                }
+                tr[i].style.display = show ? '' : 'none';
+            }
+        }
 
-    if (!email || !password) {
-      alert('Email dan kata sandi harus diisi!');
-      return;
-    }
+        document.getElementById('logout').addEventListener('click', function() {
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('employee-section').style.display = 'none';
+        });
 
-    // Simpan data pengguna
-    users.push({ email, password });
-    alert('Registrasi berhasil! Silakan login.');
-    showLoginForm();
-  }
-
-  // Fungsi login
-  function login() {
-    const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
-
-    if (!email || !password) {
-      alert('Email dan kata sandi harus diisi!');
-      return;
-    }
-
-    // Cek kredensial pengguna
-    const user = users.find(u => u.email === email && u.password === password);
-    if (user) {
-      alert('Login berhasil!');
-      showEmployeeData();
-    } else {
-      alert('Email atau kata sandi salah!');
-    }
-  }
-
-  // Menampilkan data karyawan
-  function show
-::contentReference[oaicite:0]{index=0}
- 
+        // Ensure user stays logged in on reload
+        window.onload = function() {
+            if (document.getElementById('employee-section').style.display === 'block') {
+                document.getElementById('login-form').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
